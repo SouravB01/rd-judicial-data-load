@@ -39,16 +39,4 @@ public class DataSourceConfig {
         return def;
     }
 
-    //Aggregation configuration
-    //    @Bean
-    //    public JdbcAggregationRepository getJdbcAggregationRepository() {
-    //        JdbcAggregationRepository jdbcAggregationRepository = new PostgresAggregationRepository();
-    //        jdbcAggregationRepository.setRepositoryName("aggregationRepo");
-    //        jdbcAggregationRepository.setTransactionManager(txManager());
-    //        jdbcAggregationRepository.setDataSource(dataSource);
-    //        jdbcAggregationRepository.setStoreBodyAsText(true);
-    //        jdbcAggregationRepository.setPropagationBehavior(PROPAGATION_NESTED);
-    //        return  jdbcAggregationRepository;
-    //    }
-
 }
