@@ -33,6 +33,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
+import uk.gov.hmcts.reform.juddata.camel.processor.ValidateProcessor;
 import uk.gov.hmcts.reform.juddata.camel.vo.RouteProperties;
 
 /**
@@ -43,6 +44,9 @@ public class ParentOrchestrationRoute {
 
     @Autowired
     FileReadProcessor fileReadProcessor;
+
+    @Autowired
+    ValidateProcessor validateProcessor;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -82,8 +86,13 @@ public class ParentOrchestrationRoute {
 
                         //logging exception in global exception handler
                         onException(Exception.class)
+                              //  .continued(true)
                                 .handled(true)
                                 .process(exceptionProcessor);
+
+//                        validator()
+//                                .type("greeting")
+//                                .withBean("greetingValidator");
 
                         String[] directChild = new String[dependantRoutes.size()];
 
@@ -92,6 +101,8 @@ public class ParentOrchestrationRoute {
                         //Started direct route with multicast all the configured routes eg.application-jrd-router.yaml
                         //with Transaction propagation required
                         from(startRoute)
+
+                                .to("bean-validator://x")
                                 .transacted()
                                 .policy(springTransactionPolicy)
                                 .multicast()
@@ -102,11 +113,17 @@ public class ParentOrchestrationRoute {
                             Expression exp = new SimpleExpression(route.getBlobPath());
 
                             from(DIRECT_ROUTE + route.getRouteName()).id(DIRECT_ROUTE + route.getRouteName())
-                                    .transacted()
                                     .policy(springTransactionPolicy)
                                     .setProperty(BLOBPATH, exp)
-                                    .process(fileReadProcessor).unmarshal().bindy(BindyType.Csv,
-                                    applicationContext.getBean(route.getBinder()).getClass())
+                                    .unmarshal()
+                                    .csv()
+
+                                    .process(fileReadProcessor).unmarshal()
+
+                                   // .process(validateProcessor).unmarshal()
+                                    .bindy(BindyType.Csv,
+                                            applicationContext.getBean(route.getBinder()).getClass())
+                                    .to("bean-validator://x")
                                     .to(route.getTruncateSql())
                                     .process((Processor) applicationContext.getBean(route.getProcessor()))
                                     .split().body()
@@ -122,6 +139,7 @@ public class ParentOrchestrationRoute {
     private void getDependents(String[] directChild, List<String> dependents) {
         int index = 0;
         for (String child : dependents) {
+            System.out.println("Child  names "+directChild);
             directChild[index] = (DIRECT_ROUTE).concat(child);
             index++;
         }

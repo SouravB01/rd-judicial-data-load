@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.juddata.config;
 
 import javax.sql.DataSource;
 import org.apache.camel.CamelContext;
+import org.apache.camel.component.bean.validator.BeanValidatorComponent;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.spring.spi.SpringTransactionPolicy;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -16,10 +17,7 @@ import uk.gov.hmcts.reform.juddata.camel.beans.JudicialOfficeAppointment;
 import uk.gov.hmcts.reform.juddata.camel.beans.JudicialUserProfile;
 import uk.gov.hmcts.reform.juddata.camel.mapper.JudicialOfficeAppointmentRowMapper;
 import uk.gov.hmcts.reform.juddata.camel.mapper.JudicialUserProfileRowMapper;
-import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
-import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
-import uk.gov.hmcts.reform.juddata.camel.processor.JudicialOfficeAppointmentProcessor;
-import uk.gov.hmcts.reform.juddata.camel.processor.JudicialUserProfileProcessor;
+import uk.gov.hmcts.reform.juddata.camel.processor.*;
 import uk.gov.hmcts.reform.juddata.camel.route.ParentOrchestrationRoute;
 
 @Configuration
@@ -53,6 +51,11 @@ public class CamelConfig {
         return new FileReadProcessor();
     }
 
+
+    @Bean
+    ValidateProcessor validateProcessor() {
+        return new ValidateProcessor();
+    }
 
     private static final PostgreSQLContainer testPostgres = new PostgreSQLContainer("postgres")
             .withDatabaseName("dbjuddata_test");
@@ -109,5 +112,7 @@ public class CamelConfig {
         CamelContext camelContext = new SpringCamelContext(applicationContext);
         return camelContext;
     }
+
+
 
 }

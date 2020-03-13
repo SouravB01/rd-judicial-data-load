@@ -28,5 +28,6 @@ public class JudicialUserProfileTest {
         assertEquals(currentDate, judicialUserProfile.getLastWorkingDate());
         assertEquals(true, judicialUserProfile.isActiveFlag());
         assertEquals(currentDate.toString(), judicialUserProfile.getExtractedDate());
+
     }
 }

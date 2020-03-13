@@ -8,10 +8,17 @@ import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.juddata.camel.beans.JudicialUserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 @Slf4j
 @Component
 public class FileReadProcessor implements Processor {
+
+    private static final String COMMA_DELIMITER = ",";
 
     @Override
     public void process(Exchange exchange) {
@@ -20,6 +27,28 @@ public class FileReadProcessor implements Processor {
         CamelContext context = exchange.getContext();
         ConsumerTemplate consumer = context.createConsumerTemplate();
         exchange.getMessage().setBody(consumer.receiveBody(blobFilePath, 600000));
-        log.info("::FileReadProcessor ends::");
+       String list= exchange.getIn().getBody(String.class);
+
+        List<List<String>> records = new ArrayList<>();
+        try (Scanner scanner = new Scanner(list);) {
+while (scanner.hasNextLine()) {
+records.add(getRecordFromLine(scanner.nextLine()));
+}
+
+        }
+        String[] ss=records.get(0).toString().split(",");
+        System.out.println("Lissstt "+ss.length);
+            log.info("::FileReadProcessor ends::");
     }
+    private List<String> getRecordFromLine(String line) {
+ List<String> values = new ArrayList<String>();
+try (Scanner rowScanner = new Scanner(line)) {
+rowScanner.useDelimiter(COMMA_DELIMITER);
+while (rowScanner.hasNext()) {
+values.add(rowScanner.next());
+}
+}
+return values;
+    }
+    
 }

@@ -98,3 +98,8 @@ sftp:
 gpg.password: ${GPG_PASSWORD:GPG_PASSWORD}
 gpg.public-key: ${GPG_PUBLIC_KEY:GPG_PUBLIC_KEY}
 gpg.private-key: ${GPG_PRIVATE_KEY:GPG_PRIVATE_KEY}
+
+camel:
+  component:
+    validator:
+      enabled: "true"

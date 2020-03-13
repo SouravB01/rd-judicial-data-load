@@ -5,23 +5,33 @@ import java.time.LocalDate;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 @Setter
 @Getter
-@CsvRecord(separator = ",", crlf = "UNIX", skipFirstLine = true)
+@CsvRecord(separator = ",", crlf = "UNIX", skipFirstLine = true )
 @Component
+@ToString
 public class JudicialUserProfile implements Serializable {
 
     @DataField(pos = 1, columnName = "elinks_id")
+    @NotNull
     String elinksId;
 
     @DataField(pos = 2, columnName = "personal_Code")
+    @NotEmpty( message = "Personal  code  not empty ")
     String personalCode;
 
     @DataField(pos = 3)
+    @NotEmpty
     String title;
 
     @DataField(pos = 4, columnName = "known_As")
@@ -43,6 +53,7 @@ public class JudicialUserProfile implements Serializable {
     String workPattern;
 
     @DataField(pos = 10, columnName = "email_id")
+    @Email(message = "notttt  a  valid  email  idd", regexp = "^(.+)@(.+)$")
     String emailId;
 
     @DataField(pos = 11, pattern = "yyyy-MM-dd hh:mm:ss", columnName = "joining_Date")
