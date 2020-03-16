@@ -1,24 +1,5 @@
 package uk.gov.hmcts.reform.juddata.camel.route;
 
-import static org.apache.commons.lang.WordUtils.uncapitalize;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.BLOBPATH;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.CHILD_ROUTES;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.CSVBINDER;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.DIRECT_ROUTE;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ID;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.INSERT_SQL;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.MAPPER;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.MAPPING_METHOD;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ORCHESTRATED_ROUTE;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.PROCESSOR;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ROUTE;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.TRUNCATE_SQL;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.transaction.Transactional;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Expression;
 import org.apache.camel.Processor;
@@ -35,6 +16,14 @@ import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.ValidateProcessor;
 import uk.gov.hmcts.reform.juddata.camel.vo.RouteProperties;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.apache.commons.lang.WordUtils.uncapitalize;
+import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.*;
 
 /**
  * This class is Judicial User Profile Router Triggers Orchestrated data loading.
@@ -128,7 +117,7 @@ public class ParentOrchestrationRoute {
                                     .process((Processor) applicationContext.getBean(route.getProcessor()))
                                     .split().body()
                                     .streaming()
-                                    .bean(applicationContext.getBean(route.getMapper()), MAPPING_METHOD)
+                                    .bean( applicationContext.getBean(route.getMapper()), MAPPING_METHOD)
                                     .to(route.getSql()).end();
                         }
                     }

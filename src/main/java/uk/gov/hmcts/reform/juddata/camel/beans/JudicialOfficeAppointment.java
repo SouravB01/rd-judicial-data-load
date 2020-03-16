@@ -9,11 +9,14 @@ import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
+
 
 @Setter
 @Getter
 @CsvRecord(separator = ",", crlf = "UNIX", skipFirstLine = true)
 @Component
+@Valid
 public class JudicialOfficeAppointment implements Serializable {
 
     @DataField(pos = 1, columnName = "elinks_id")

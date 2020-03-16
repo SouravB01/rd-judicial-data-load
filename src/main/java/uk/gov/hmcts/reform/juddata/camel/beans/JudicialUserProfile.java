@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.juddata.camel.beans;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,16 +7,20 @@ import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.time.LocalDate;
 
 @Setter
 @Getter
 @CsvRecord(separator = ",", crlf = "UNIX", skipFirstLine = true )
 @Component
 @ToString
+@Valid
 public class JudicialUserProfile implements Serializable {
 
     @DataField(pos = 1, columnName = "elinks_id")
@@ -28,6 +29,8 @@ public class JudicialUserProfile implements Serializable {
 
     @DataField(pos = 2, columnName = "personal_Code")
     @NotEmpty( message = "Personal  code  not empty ")
+    @Size(max=1)
+    @Valid
     String personalCode;
 
     @DataField(pos = 3)

@@ -1,17 +1,18 @@
 package uk.gov.hmcts.reform.juddata.camel.processor;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.junit.Test;
+import uk.gov.hmcts.reform.juddata.camel.beans.JudicialOfficeAppointment;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.juddata.camel.helper.JrdUnitTestHelper.createCurrentLocalDate;
 import static uk.gov.hmcts.reform.juddata.camel.helper.JrdUnitTestHelper.createJudicialOfficeAppointmentMockMock;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.junit.Test;
-import uk.gov.hmcts.reform.juddata.camel.beans.JudicialOfficeAppointment;
 
 public class JudicialOfficeAppointmentProcessorTest {
 
@@ -21,7 +22,7 @@ public class JudicialOfficeAppointmentProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void should_return_JudicialOfficeAppointmentRow_response() {
+    public void should_return_JudicialOfficeAppointmentRow_response() throws IllegalAccessException {
 
         List<JudicialOfficeAppointment> judicialOfficeAppointments = new ArrayList<>();
         judicialOfficeAppointments.add(judicialOfficeAppointmentMock1);
@@ -39,7 +40,7 @@ public class JudicialOfficeAppointmentProcessorTest {
     }
 
     @Test
-    public void should_return_JudicialOfficeAppointmentRow_with_single_record_response() {
+    public void should_return_JudicialOfficeAppointmentRow_with_single_record_response() throws IllegalAccessException {
 
         Exchange exchangeMock = mock(Exchange.class);
         Message messageMock = mock(Message.class);
@@ -52,7 +53,7 @@ public class JudicialOfficeAppointmentProcessorTest {
     }
 
     @Test
-    public void should_return_JudicialOfficeAppointmentRow_with_single_record_with_elinks_id_nullresponse() {
+    public void should_return_JudicialOfficeAppointmentRow_with_single_record_with_elinks_id_nullresponse() throws IllegalAccessException {
 
         judicialOfficeAppointmentMock1.setElinksId(null);
         Exchange exchangeMock = mock(Exchange.class);

@@ -11,13 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.juddata.camel.beans.JudicialOfficeAppointment;
 
+import javax.validation.Valid;
+
 @Slf4j
 @Component
 public class JudicialOfficeAppointmentRowMapper {
 
     private int seqNumber = 0;
 
-    public Map<String, Object> getMap(JudicialOfficeAppointment officeAppoinemnt) {
+    public Map<String, Object> getMap(@Valid JudicialOfficeAppointment officeAppoinemnt) {
 
         Map<String, Object> judOfficeAppointmentRow = new HashMap<>();
 
