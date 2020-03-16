@@ -100,13 +100,15 @@ public class ParentOrchestrationRoute {
                         for (RouteProperties route : routePropertiesList) {
 
                             Expression exp = new SimpleExpression(route.getBlobPath());
+                            Expression binder = new SimpleExpression(route.getBinder());
 
                             from(DIRECT_ROUTE + route.getRouteName()).id(DIRECT_ROUTE + route.getRouteName())
                                     .policy(springTransactionPolicy)
                                     .setProperty(BLOBPATH, exp)
+                                    .setProperty( CSVBINDER  ,  binder)
                                     .unmarshal()
                                     .csv()
-
+.log("Mapper is "+route.getBinder())
                                     .process(fileReadProcessor).unmarshal()
 
                                    // .process(validateProcessor).unmarshal()

@@ -21,14 +21,7 @@ public class JudicialUserProfileProcessor implements Processor {
         List<JudicialUserProfile> judicialUserProfiles;
         String  body12=exchange.getIn().getBody(String.class);
         System.out.println("body12  "+body12);
-        if (exchange.getIn().getBody() instanceof List) {
-            judicialUserProfiles = (List< JudicialUserProfile>) exchange.getIn().getBody();
-        } else {
-            JudicialUserProfile judicialUserProfile = (JudicialUserProfile) exchange.getIn().getBody();
-            judicialUserProfiles = new ArrayList<>();
-
-            judicialUserProfiles.add(judicialUserProfile);
-        }
+        judicialUserProfiles = getJudicialUserProfiles(exchange);
 
         for (JudicialUserProfile user : judicialUserProfiles) {
 
@@ -43,6 +36,19 @@ public class JudicialUserProfileProcessor implements Processor {
         }
         log.info("::JudicialUserProfile Records count::" + users.size());
         log.info("::JudicialUserProfile Records count::" + users.toString());
+    }
+
+    public List<JudicialUserProfile> getJudicialUserProfiles(Exchange exchange) {
+        List<JudicialUserProfile> judicialUserProfiles;
+        if (exchange.getIn().getBody() instanceof List) {
+            judicialUserProfiles = (List< JudicialUserProfile>) exchange.getIn().getBody();
+        } else {
+            JudicialUserProfile judicialUserProfile = (JudicialUserProfile) exchange.getIn().getBody();
+            judicialUserProfiles = new ArrayList<>();
+
+            judicialUserProfiles.add(judicialUserProfile);
+        }
+        return judicialUserProfiles;
     }
 
 
