@@ -14,9 +14,8 @@ public class ValidationUtilsImpl implements ValidationUtils {
     @Override
     public int valid(Class validateClass, String object) throws NoSuchFieldException {
         int size = validateClass.getDeclaredFields().length;
-
-
-        if (validateClass.getDeclaredFields().length == (getRecordFromList(object).length + 1)) {
+        System.out.println(validateClass.getDeclaredFields().length+"Tesssst"+(getRecordFromList(object).length+1));
+        if (validateClass.getDeclaredFields().length == getRecordFromList(object).length+1){
             System.out.println("SUCESSS " + validateClass.getName());
         }
         return size;
@@ -44,4 +43,21 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
         return values;
     }
+
+
+//    @SuppressWarnings({"unchecked"})
+//    public   <T extends  List>  List getJudicialUserProfiles(Exchange exchange) {
+//        List<T > judicialUserProfiles;
+//        if (exchange.getIn().getBody() instanceof List) {
+//            judicialUserProfiles = (List<T>) exchange.getIn().getBody();
+//        } else {
+//            T judicialUserProfile = (T) exchange.getIn().getBody();
+//            judicialUserProfiles = new ArrayList<>();
+//
+//            judicialUserProfiles.add(judicialUserProfile);
+//        }
+//        return judicialUserProfiles;
+//    }
+
+
 }

@@ -12,8 +12,12 @@ public class ValidationTest
 {
     public static void main(String[] args) throws IllegalAccessException {
 
+        checkConstraints();
+    }
+
+    public static void checkConstraints() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        int  dd=JudicialUserProfile.class.getDeclaredFields().length;
+        int  dd= JudicialUserProfile.class.getDeclaredFields().length;
         System.out.println("Length "+dd);
         //It validates bean instances
         Validator validator = factory.getValidator();

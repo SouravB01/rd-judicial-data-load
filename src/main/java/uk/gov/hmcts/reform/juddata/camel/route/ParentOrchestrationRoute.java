@@ -108,8 +108,8 @@ public class ParentOrchestrationRoute {
                                     .setProperty( CSVBINDER  ,  binder)
                                     .unmarshal()
                                     .csv()
-.log("Mapper is "+route.getBinder())
-                                    .process(fileReadProcessor).unmarshal()
+                                    .process(fileReadProcessor)
+                                    .unmarshal()
 
                                    // .process(validateProcessor).unmarshal()
                                     .bindy(BindyType.Csv,

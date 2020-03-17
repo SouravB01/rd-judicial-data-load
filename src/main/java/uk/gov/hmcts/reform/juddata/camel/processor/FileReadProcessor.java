@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.juddata.camel.processor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.CamelContext;
-import org.apache.camel.ConsumerTemplate;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
+import org.apache.camel.*;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.juddata.camel.beans.JudicialOfficeAppointment;
 import uk.gov.hmcts.reform.juddata.camel.beans.JudicialUserProfile;
@@ -24,7 +21,7 @@ public class FileReadProcessor implements Processor {
     ValidationUtils validationUtils=new ValidationUtilsImpl();
 
     @Override
-    public void process(Exchange exchange) throws NoSuchFieldException {
+    public void process(Exchange exchange) throws NoSuchFieldException, InvalidPayloadException {
         log.info("::FileReadProcessor starts::");
         String blobFilePath = (String) exchange.getProperty(BLOBPATH);
         CamelContext context = exchange.getContext();
@@ -35,7 +32,7 @@ public class FileReadProcessor implements Processor {
         log.info("::FileReadProcessor ends::");
     }
 
-    public void checkBinder(Exchange exchange, String list) throws NoSuchFieldException {
+    public void checkBinder(Exchange exchange, String list) throws NoSuchFieldException, InvalidPayloadException {
 
         switch(exchange.getProperty(CSVBINDER).toString())
         {
