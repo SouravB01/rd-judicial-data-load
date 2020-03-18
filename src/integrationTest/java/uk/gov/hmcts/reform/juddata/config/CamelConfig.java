@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.juddata.config;
 
-import javax.sql.DataSource;
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.bean.validator.BeanValidatorComponent;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.spring.spi.SpringTransactionPolicy;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -19,6 +17,8 @@ import uk.gov.hmcts.reform.juddata.camel.mapper.JudicialOfficeAppointmentRowMapp
 import uk.gov.hmcts.reform.juddata.camel.mapper.JudicialUserProfileRowMapper;
 import uk.gov.hmcts.reform.juddata.camel.processor.*;
 import uk.gov.hmcts.reform.juddata.camel.route.ParentOrchestrationRoute;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class CamelConfig {
@@ -106,6 +106,8 @@ public class CamelConfig {
     public ExceptionProcessor exceptionProcessor() {
         return new ExceptionProcessor();
     }
+
+
 
     @Bean
     public CamelContext camelContext() {

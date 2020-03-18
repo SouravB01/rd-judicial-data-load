@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.juddata.camel.route;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
 import org.apache.camel.Processor;
 import org.apache.camel.model.dataformat.BindyType;
@@ -14,11 +15,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
-import uk.gov.hmcts.reform.juddata.camel.processor.ValidateProcessor;
 import uk.gov.hmcts.reform.juddata.camel.vo.RouteProperties;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,13 +36,11 @@ public class ParentOrchestrationRoute {
     FileReadProcessor fileReadProcessor;
 
     @Autowired
-    ValidateProcessor validateProcessor;
-
-    @Autowired
     ApplicationContext applicationContext;
 
     @Autowired
     Environment environment;
+
 
     @Autowired
     SpringTransactionPolicy springTransactionPolicy;
@@ -79,9 +78,9 @@ public class ParentOrchestrationRoute {
                                 .handled(true)
                                 .process(exceptionProcessor);
 
-//                        validator()
-//                                .type("greeting")
-//                                .withBean("greetingValidator");
+                        intercept().to("log:Hello").log("Hiiiiii");
+
+
 
                         String[] directChild = new String[dependantRoutes.size()];
 
@@ -90,7 +89,12 @@ public class ParentOrchestrationRoute {
                         //Started direct route with multicast all the configured routes eg.application-jrd-router.yaml
                         //with Transaction propagation required
                         from(startRoute)
-
+                                .process(new Processor() {
+                                    @Override
+                                    public void process(Exchange exchange) throws Exception {
+                                        System.out.println("Time "+Calendar.DATE);
+                                    }
+                                })
                                 .to("bean-validator://x")
                                 .transacted()
                                 .policy(springTransactionPolicy)
