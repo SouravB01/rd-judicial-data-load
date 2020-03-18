@@ -11,6 +11,16 @@ archival-file-names: test.csv,judicial_userprofile.csv
 archival-cred: noop=true
 archival-date-format: dd-MM-yyyy--HH-mm
 file-read-time-out: 2000
+
+smtp:
+  from:
+    email: sendcamel@camel.com
+  host: smtp.mailtrap.io
+  password: a4b16ae4f7193e
+  port: 25
+  username: 8c6223b73c25f5
+
+
 route:
   judicial-user-profile-orchestration:
     id: judicial-user-profile-orchestration

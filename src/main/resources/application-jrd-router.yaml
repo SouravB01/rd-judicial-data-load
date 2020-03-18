@@ -8,6 +8,8 @@ archival-file-names: Personal.csv,Appointments.csv
 archival-cred: credentials=#credsreg&operation=updateBlockBlob
 archival-date-format: dd-MM-yyyy--HH-mm
 file-read-time-out: 200000
+mail-url: smtp://smtp.mailtrap.io:25?username=8c6223b73c25f5&password=a4b16ae4f7193e&from=sendcamel@camel.com
+
 route:
   judicial-user-profile-orchestration:
     id: judicial-user-profile-orchestration

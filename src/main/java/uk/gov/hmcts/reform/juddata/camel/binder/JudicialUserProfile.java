@@ -1,18 +1,20 @@
 package uk.gov.hmcts.reform.juddata.camel.binder;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.time.LocalDate;
 
 @Setter
 @Getter
 @CsvRecord(separator = ",", crlf = "UNIX", skipFirstLine = true, skipField = true)
 @Component
+@ToString
 public class JudicialUserProfile implements Serializable {
 
     @DataField(pos = 1, columnName = "elinks_id")
