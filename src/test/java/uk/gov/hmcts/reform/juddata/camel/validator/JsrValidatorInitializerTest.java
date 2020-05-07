@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -13,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static uk.gov.hmcts.reform.juddata.camel.helper.JrdTestSupport.createJudicialUserProfileMock;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ROUTE_DETAILS;
+import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.SCHEDULER_NAME;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.SCHEDULER_START_TIME;
 
 import java.time.LocalDateTime;
@@ -29,8 +29,6 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import uk.gov.hmcts.reform.juddata.camel.binder.JudicialUserProfile;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
 
@@ -61,17 +59,17 @@ public class JsrValidatorInitializerTest {
         Message message = mock(Message.class);
         RouteProperties routeProperties = new RouteProperties();
         routeProperties.setTableName("test");
+        routeProperties.setIsMainRoute(true);
         when(exchange.getIn()).thenReturn(message);
         CamelContext camelContext = new DefaultCamelContext();
         Map<String, String> map = new HashMap<>();
         map.put(SCHEDULER_START_TIME, String.valueOf(new Date().getTime()));
+        map.put(SCHEDULER_NAME,"test");
         camelContext.setGlobalOptions(map);
 
         when(message.getHeader(ROUTE_DETAILS)).thenReturn(routeProperties);
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        final PlatformTransactionManager platformTransactionManager = mock(PlatformTransactionManager.class);
-        final TransactionStatus transactionStatus = mock(TransactionStatus.class);
-        setField(judicialUserProfileJsrValidatorInitializer, "platformTransactionManager", platformTransactionManager);
+
         setField(judicialUserProfileJsrValidatorInitializer, "jdbcTemplate", jdbcTemplate);
         setField(judicialUserProfileJsrValidatorInitializer, "camelContext", camelContext);
         setField(judicialUserProfileJsrValidatorInitializer, "jsrThresholdLimit", 5);
@@ -87,10 +85,11 @@ public class JsrValidatorInitializerTest {
         judicialUserProfileJsrValidatorInitializerSpy.validate(judicialUserProfiles);
         int[][] intArray = new int[1][];
         when(jdbcTemplate.batchUpdate(anyString(), anyList(), anyInt(), any())).thenReturn(intArray);
-        when(platformTransactionManager.getTransaction(any())).thenReturn(transactionStatus);
-        doNothing().when(platformTransactionManager).commit(transactionStatus);
 
-        judicialUserProfileJsrValidatorInitializerSpy.auditJsrExceptions(exchange);
-        verify(judicialUserProfileJsrValidatorInitializerSpy, times(1)).validate(any());
+        judicialUserProfileJsrValidatorInitializerSpy.initializeJsrExceptions(exchange);
+        verify(judicialUserProfileJsrValidatorInitializerSpy, times(1)).initializeJsrExceptions(any());
+
+        judicialUserProfileJsrValidatorInitializerSpy.auditJsrExceptions(true);
+        verify(judicialUserProfileJsrValidatorInitializerSpy, times(1)).auditJsrExceptions(true);
     }
 }

@@ -26,17 +26,13 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import uk.gov.hmcts.reform.juddata.camel.exception.RouteFailedException;
+import uk.gov.hmcts.reform.juddata.camel.route.beans.JsrAuditRow;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
 
 @Component
@@ -46,7 +42,6 @@ public class JsrValidatorInitializer<T> {
     private Validator validator;
 
     @Autowired
-    @Qualifier("springJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Value("${invalid-header-sql}")
@@ -55,11 +50,9 @@ public class JsrValidatorInitializer<T> {
     @Autowired
     CamelContext camelContext;
 
-    @Autowired
-    @Qualifier("springJdbcTransactionManager")
-    PlatformTransactionManager platformTransactionManager;
-
     private Set<ConstraintViolation<T>> constraintViolations;
+
+    private List<JsrAuditRow> jsrAuditRows;
 
     @Value("${invalid-jsr-sql}")
     String invalidJsrSql;
@@ -71,6 +64,7 @@ public class JsrValidatorInitializer<T> {
     public void initializeFactory() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
+        jsrAuditRows = new ArrayList<>();
     }
 
     /**
@@ -100,43 +94,59 @@ public class JsrValidatorInitializer<T> {
     }
 
     /**
-     * Auditing JSR Exception.
+     * Intializing JSR Exception.
      *
      * @param exchange Exchange
      */
-    public void auditJsrExceptions(Exchange exchange) {
+    public void initializeJsrExceptions(Exchange exchange) {
 
         log.info("::::JsrValidatorInitializer data processing audit start::::");
-
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("Jsr exception logs");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-
         RouteProperties routeProperties = (RouteProperties) exchange.getIn().getHeader(ROUTE_DETAILS);
         String schedulerTime = camelContext.getGlobalOptions().get(SCHEDULER_START_TIME);
 
         List<ConstraintViolation<T>> violationList = constraintViolations.stream().limit(jsrThresholdLimit)
                 .collect(Collectors.toList());
 
+        for (ConstraintViolation violation : violationList) {
+            JsrAuditRow jsrAuditRow = JsrAuditRow.builder()
+                    .tableName(routeProperties.getTableName())
+                    .scheduledTime(new Timestamp(Long.valueOf(schedulerTime)))
+                    .schedulerName(camelContext.getGlobalOptions().get(SCHEDULER_NAME))
+                    .keyField(getKeyFiled(violation.getRootBean()))
+                    .invalidField(violation.getPropertyPath().toString())
+                    .message(violation.getMessage())
+                    .currentTime(new Timestamp(new Date().getTime()))
+                    .isMainRoute(routeProperties.getIsMainRoute())
+                    .build();
+            jsrAuditRows.add(jsrAuditRow);
+        }
+    }
+
+    /**
+     * Intializing JSR Exception.
+     *
+     * @param isMainRoute boolean
+     */
+    public void auditJsrExceptions(boolean isMainRoute) {
+
+        List<JsrAuditRow> auditRows = jsrAuditRows.stream().filter(row -> row.getIsMainRoute().equals(isMainRoute))
+                .collect(Collectors.toList());
+
         jdbcTemplate.batchUpdate(
                 invalidJsrSql,
-                violationList,
+                auditRows,
                 10,
-                new ParameterizedPreparedStatementSetter<ConstraintViolation<T>>() {
-                    public void setValues(PreparedStatement ps, ConstraintViolation<T> argument) throws SQLException {
-                        ps.setString(1, routeProperties.getTableName());
-                        ps.setTimestamp(2, new Timestamp(Long.valueOf(schedulerTime)));
-                        ps.setString(3, camelContext.getGlobalOptions().get(SCHEDULER_NAME));
-                        ps.setString(4, getKeyFiled(argument.getRootBean()));
-                        ps.setString(5, argument.getPropertyPath().toString());
+                new ParameterizedPreparedStatementSetter<JsrAuditRow>() {
+                    public void setValues(PreparedStatement ps, JsrAuditRow argument) throws SQLException {
+                        ps.setString(1, argument.getTableName());
+                        ps.setTimestamp(2, argument.getScheduledTime());
+                        ps.setString(3, argument.getSchedulerName());
+                        ps.setString(4, argument.getKeyField());
+                        ps.setString(5, argument.getInvalidField());
                         ps.setString(6, argument.getMessage());
-                        ps.setTimestamp(7, new Timestamp(new Date().getTime()));
+                        ps.setTimestamp(7, argument.getCurrentTime());
                     }
                 });
-
-        TransactionStatus status = platformTransactionManager.getTransaction(def);
-        platformTransactionManager.commit(status);
-        log.info("::::JsrValidatorInitializer data processing audit complete::::");
     }
 
     /**
@@ -165,6 +175,10 @@ public class JsrValidatorInitializer<T> {
 
     public Set<ConstraintViolation<T>> getConstraintViolations() {
         return constraintViolations;
+    }
+
+    public List<JsrAuditRow> getJsrAuditRows() {
+        return jsrAuditRows;
     }
 }
 

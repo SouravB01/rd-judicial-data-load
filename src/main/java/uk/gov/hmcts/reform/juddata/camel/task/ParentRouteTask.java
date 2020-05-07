@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.juddata.camel.task;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.IS_EXCEPTION_HANDLED;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.JUDICIAL_USER_PROFILE_ORCHESTRATION;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.SCHEDULER_STATUS;
@@ -13,9 +14,14 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.juddata.camel.exception.RouteFailedException;
+import uk.gov.hmcts.reform.juddata.camel.processor.HeaderValidationProcessor;
+import uk.gov.hmcts.reform.juddata.camel.route.beans.JsrAuditRow;
 import uk.gov.hmcts.reform.juddata.camel.service.AuditProcessingService;
 import uk.gov.hmcts.reform.juddata.camel.util.DataLoadUtil;
+import uk.gov.hmcts.reform.juddata.camel.validator.JsrValidatorInitializer;
 
 @Component
 @Slf4j
@@ -36,6 +42,14 @@ public class ParentRouteTask implements Tasklet {
     @Autowired
     AuditProcessingService schedulerAuditProcessingService;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    HeaderValidationProcessor headerValidationProcessor;
+
+    @Autowired
+    JsrValidatorInitializer jsrValidatorInitializer;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -46,10 +60,17 @@ public class ParentRouteTask implements Tasklet {
             dataLoadUtil.setGlobalConstant(camelContext, JUDICIAL_USER_PROFILE_ORCHESTRATION);
             producerTemplate.sendBody(startRoute, "starting JRD orchestration");
         } catch (Exception ex) {
-            log.error("::judicial-user-profile-orchestration route failed::",  ex.getMessage());
+            log.error("::judicial-user-profile-orchestration route failed::", ex.getMessage());
+            if (ex instanceof RouteFailedException) {
+                JsrAuditRow jsrAuditRow = headerValidationProcessor.getJsrAuditRow();
+                if (nonNull(jsrAuditRow) && jsrAuditRow.getIsMainRoute()) {
+                    headerValidationProcessor.auditHeaderException();
+                }
+            }
         } finally {
             //runs Job Auditing
             schedulerAuditProcessingService.auditSchedulerStatus(camelContext);
+            jsrValidatorInitializer.auditJsrExceptions(true);
         }
         return RepeatStatus.FINISHED;
     }

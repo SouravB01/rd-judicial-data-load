@@ -1,16 +1,10 @@
 package uk.gov.hmcts.reform.juddata.camel.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static uk.gov.hmcts.reform.juddata.camel.helper.JrdTestSupport.createJudicialUserProfileMock;
-import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ROUTE_DETAILS;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -118,15 +112,6 @@ public class JudicialUserProfileProcessorTest {
 
         setField(judicialUserProfileProcessor, "jsrThresholdLimit", 5);
         setField(judicialUserProfileJsrValidatorInitializer, "camelContext", camelContext);
-        setField(judicialUserProfileJsrValidatorInitializer, "jdbcTemplate", jdbcTemplate);
-        setField(judicialUserProfileJsrValidatorInitializer,
-                "platformTransactionManager", platformTransactionManager);
-
-        int[][] intArray = new int[1][];
-        when(jdbcTemplate.batchUpdate(anyString(), anyList(), anyInt(), any())).thenReturn(intArray);
-        when(platformTransactionManager.getTransaction(any())).thenReturn(transactionStatus);
-        doNothing().when(platformTransactionManager).commit(transactionStatus);
-        when(exchangeMock.getIn().getHeader(ROUTE_DETAILS)).thenReturn(routeProperties);
 
         judicialUserProfileProcessor.process(exchangeMock);
         assertThat(((JudicialUserProfile) exchangeMock.getMessage().getBody())).isSameAs(judicialUserProfileMock1);
@@ -138,11 +123,7 @@ public class JudicialUserProfileProcessorTest {
         judicialUserProfileMock1.setElinksId(null);
         Exchange exchangeMock = mock(Exchange.class);
         Message messageMock = mock(Message.class);
-
         when(exchangeMock.getContext()).thenReturn(new DefaultCamelContext());
-        final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        final PlatformTransactionManager platformTransactionManager = mock(PlatformTransactionManager.class);
-        final TransactionStatus transactionStatus = mock(TransactionStatus.class);
 
         when(exchangeMock.getIn()).thenReturn(messageMock);
         when(exchangeMock.getMessage()).thenReturn(messageMock);
@@ -152,16 +133,6 @@ public class JudicialUserProfileProcessorTest {
 
         setField(judicialUserProfileProcessor, "jsrThresholdLimit", 0);
         setField(judicialUserProfileJsrValidatorInitializer, "camelContext", camelContext);
-        setField(judicialUserProfileJsrValidatorInitializer, "jdbcTemplate", jdbcTemplate);
-        setField(judicialUserProfileJsrValidatorInitializer,
-                "platformTransactionManager", platformTransactionManager);
-
-        int[][] intArray = new int[1][];
-        when(jdbcTemplate.batchUpdate(anyString(), anyList(), anyInt(), any())).thenReturn(intArray);
-        when(platformTransactionManager.getTransaction(any())).thenReturn(transactionStatus);
-        doNothing().when(platformTransactionManager).commit(transactionStatus);
-        when(exchangeMock.getIn().getHeader(ROUTE_DETAILS)).thenReturn(routeProperties);
-
         judicialUserProfileProcessor.process(exchangeMock);
         assertThat(((JudicialUserProfile) exchangeMock.getMessage().getBody())).isSameAs(judicialUserProfileMock1);
     }

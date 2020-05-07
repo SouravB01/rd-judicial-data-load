@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.juddata.camel.route;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.copyOf;
 import static org.apache.commons.lang.WordUtils.uncapitalize;
 import static uk.gov.hmcts.reform.juddata.camel.util.DataLoadUtil.failureProcessor;
@@ -226,6 +227,7 @@ public class ParentOrchestrationRoute {
                     ROUTE + "." + child + "." + FILE_NAME));
             properties.setTableName(environment.getProperty(
                     ROUTE + "." + child + "." + TABLE_NAME));
+            properties.setIsMainRoute(TRUE);
             routePropertiesList.add(index, properties);
             index++;
         }

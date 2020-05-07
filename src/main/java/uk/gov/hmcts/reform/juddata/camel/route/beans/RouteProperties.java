@@ -28,4 +28,6 @@ public class RouteProperties {
     String fileName;
 
     String tableName;
+
+    Boolean isMainRoute;
 }

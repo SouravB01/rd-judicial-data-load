@@ -1,11 +1,6 @@
 package uk.gov.hmcts.reform.juddata.camel.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -114,15 +109,7 @@ public class JudicialOfficeAppointmentProcessorTest {
 
         setField(judicialOfficeAppointmentProcessor, "jsrThresholdLimit", 5);
         setField(judicialOfficeAppointmentJsrValidatorInitializer, "camelContext", camelContext);
-        setField(judicialOfficeAppointmentJsrValidatorInitializer, "jdbcTemplate", jdbcTemplate);
-        setField(judicialOfficeAppointmentJsrValidatorInitializer,
-                "platformTransactionManager", platformTransactionManager);
-
-        int[][] intArray = new int[1][];
-        when(jdbcTemplate.batchUpdate(anyString(), anyList(), anyInt(), any())).thenReturn(intArray);
-        when(platformTransactionManager.getTransaction(any())).thenReturn(transactionStatus);
         when(exchangeMock.getContext()).thenReturn(new DefaultCamelContext());
-        doNothing().when(platformTransactionManager).commit(transactionStatus);
         when(exchangeMock.getIn().getHeader(ROUTE_DETAILS)).thenReturn(routeProperties);
         judicialOfficeAppointmentProcessor.process(exchangeMock);
         assertThat(((JudicialOfficeAppointment) exchangeMock.getMessage().getBody())).isSameAs(judicialOfficeAppointmentMock1);

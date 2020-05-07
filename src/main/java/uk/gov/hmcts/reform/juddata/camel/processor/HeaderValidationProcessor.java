@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.juddata.camel.processor;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.HEADER_EXCEPTION;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.ROUTE_DETAILS;
 import static uk.gov.hmcts.reform.juddata.camel.util.MappingConstants.SCHEDULER_NAME;
@@ -21,16 +22,12 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import uk.gov.hmcts.reform.juddata.camel.exception.RouteFailedException;
+import uk.gov.hmcts.reform.juddata.camel.route.beans.JsrAuditRow;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
 
 @Component
@@ -42,16 +39,14 @@ public class HeaderValidationProcessor implements Processor {
     @Autowired
     CamelContext camelContext;
 
-    @Autowired
-    @Qualifier("springJdbcTemplate")
-    private JdbcTemplate jdbcTemplate;
 
     @Value("${invalid-header-sql}")
     String invalidHeaderSql;
 
+    private JsrAuditRow jsrAuditRow;
+
     @Autowired
-    @Qualifier("springJdbcTransactionManager")
-    PlatformTransactionManager platformTransactionManager;
+    JdbcTemplate jdbcTemplate;
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -73,23 +68,32 @@ public class HeaderValidationProcessor implements Processor {
         //Auditing in database if headers are missing
         if (header.length > csvFields.size()) {
             exchange.getIn().setHeader(HEADER_EXCEPTION, HEADER_EXCEPTION);
-            //separate transaction manager required for auditing as it is independent form route
-            //Transaction
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            def.setName("header exception logs");
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             String schedulerTime = camelContext.getGlobalOptions().get(SCHEDULER_START_TIME);
             String schedulerName = camelContext.getGlobalOptions().get(SCHEDULER_NAME);
-            Object[] params = new Object[]{routeProperties.getFileName(), new Timestamp(Long.valueOf(schedulerTime)),
-                schedulerName, "Mismatch headers in csv for ::" + routeProperties.getBinder(), new Timestamp(new Date().getTime())};
-            jdbcTemplate.update(invalidHeaderSql, params);
-            TransactionStatus status = platformTransactionManager.getTransaction(def);
-            platformTransactionManager.commit(status);
+
+            jsrAuditRow = JsrAuditRow.builder().fileName(routeProperties.getFileName())
+                    .scheduledTime(new Timestamp(Long.valueOf(schedulerTime)))
+                    .schedulerName(schedulerName)
+                    .message("Mismatch headers in csv for ::" + routeProperties.getFileName())
+                    .currentTime(new Timestamp(new Date().getTime()))
+                    .isMainRoute(routeProperties.getIsMainRoute())
+                    .build();
             throw new RouteFailedException("Mismatch headers in csv for ::" + routeProperties.getFileName());
         }
 
         InputStream inputStream = new ByteArrayInputStream(csv.getBytes(Charset.forName("UTF-8")));
-
         exchange.getMessage().setBody(inputStream);
+    }
+
+    public JsrAuditRow getJsrAuditRow() {
+        return jsrAuditRow;
+    }
+
+    public void auditHeaderException() {
+        if (nonNull(jsrAuditRow)) {
+            Object[] params = new Object[]{jsrAuditRow.getFileName(), jsrAuditRow.getScheduledTime(),
+                    jsrAuditRow.getSchedulerName(), jsrAuditRow.getMessage(), jsrAuditRow.getCurrentTime()};
+            jdbcTemplate.update(invalidHeaderSql, params);
+        }
     }
 }

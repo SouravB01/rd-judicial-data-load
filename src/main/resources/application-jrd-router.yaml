@@ -16,8 +16,7 @@ invalid-jsr-sql: insert into dataload_exception_records(table_name,scheduler_sta
 jsr-threshold-limit: 100
 scheduler-insert-sql:  insert into dataload_schedular_audit (scheduler_name,scheduler_start_time,scheduler_end_time,scheduler_status)
   values(?,?,?,?)
-# TO do need to removed notr required
-scheduler-leaf-name: judicial_main_scheduler
+
 route:
   judicial-user-profile-orchestration:
     id: judicial-user-profile-orchestration

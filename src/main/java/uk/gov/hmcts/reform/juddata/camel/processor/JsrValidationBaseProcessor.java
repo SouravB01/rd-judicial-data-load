@@ -30,7 +30,7 @@ public abstract class JsrValidationBaseProcessor<T> implements Processor {
                 && jsrValidatorInitializer.getConstraintViolations().size() > 0) {
             log.warn("Jsr exception in" + this.getClass().getSimpleName() + "Please check database table");
             //Auditing JSR exceptions in exception table
-            jsrValidatorInitializer.auditJsrExceptions(exchange);
+            jsrValidatorInitializer.initializeJsrExceptions(exchange);
             exchange.getContext().getGlobalOptions().put(SCHEDULER_STATUS, PARTIAL_SUCCESS);
         }
 
