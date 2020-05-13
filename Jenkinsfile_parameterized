@@ -37,9 +37,6 @@ def vaultOverrides = [
 ]
 
 withParameterizedPipeline(type, product, component, 'sandbox', 'sandbox') {
-    after('smoketest:aat') {
-        sh "rm -rf infrastructure/"
-    }
 
     overrideVaultEnvironments(vaultOverrides)
     setVaultName('rd')

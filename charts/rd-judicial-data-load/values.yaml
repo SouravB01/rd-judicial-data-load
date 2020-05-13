@@ -27,7 +27,6 @@ job:
         - ACCOUNT-KEY
         - CONTAINER-NAME
         - BLOB-URL-SUFFIX
-        -
 postgresql:
   enabled: false
 

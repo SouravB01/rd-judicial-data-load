@@ -72,6 +72,5 @@ public class ParentRouteTask implements Tasklet {
             schedulerAuditProcessingService.auditSchedulerStatus(camelContext);
             jsrValidatorInitializer.auditJsrExceptions(true);
         }
-        return RepeatStatus.FINISHED;
     }
 }
