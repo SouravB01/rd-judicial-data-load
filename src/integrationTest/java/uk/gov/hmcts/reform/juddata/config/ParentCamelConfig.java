@@ -203,4 +203,9 @@ public class ParentCamelConfig {
     LeafRouteTask leafRouteTask() {
         return new LeafRouteTask();
     }
+
+    @Bean
+    JsrValidatorInitializer jsrValidatorInitializer() {
+        return new JsrValidatorInitializer();
+    }
 }

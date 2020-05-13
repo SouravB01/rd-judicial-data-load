@@ -49,7 +49,7 @@ public class ParentRouteTask implements Tasklet {
     HeaderValidationProcessor headerValidationProcessor;
 
     @Autowired
-    JsrValidatorInitializer jsrValidatorInitializer;
+    JsrValidatorInitializer<?> jsrValidatorInitializer;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -72,5 +72,6 @@ public class ParentRouteTask implements Tasklet {
             schedulerAuditProcessingService.auditSchedulerStatus(camelContext);
             jsrValidatorInitializer.auditJsrExceptions(true);
         }
+        return RepeatStatus.FINISHED;
     }
 }

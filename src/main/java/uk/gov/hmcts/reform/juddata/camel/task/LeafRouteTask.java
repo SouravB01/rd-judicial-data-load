@@ -45,7 +45,7 @@ public class LeafRouteTask implements Tasklet {
     HeaderValidationProcessor headerValidationProcessor;
 
     @Autowired
-    JsrValidatorInitializer jsrValidatorInitializer;
+    JsrValidatorInitializer<?> jsrValidatorInitializer;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -63,14 +63,12 @@ public class LeafRouteTask implements Tasklet {
                         headerValidationProcessor.auditHeaderException();
                     }
                 }
-
             }
         } finally {
             //runs Job Auditing
             schedulerAuditProcessingService.auditSchedulerStatus(camelContext);
             jsrValidatorInitializer.auditJsrExceptions(false);
         }
-
         return RepeatStatus.FINISHED;
     }
 }
