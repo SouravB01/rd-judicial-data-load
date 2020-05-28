@@ -14,8 +14,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.juddata.camel.service.AuditProcessingService;
-import uk.gov.hmcts.reform.juddata.camel.service.EmailService;
 
 @Component
 @Slf4j
@@ -23,12 +21,6 @@ public class ExceptionProcessor implements Processor {
 
     @Autowired
     CamelContext camelContext;
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    AuditProcessingService auditProcessingService;
 
     @Override
     public void process(Exchange exchange) throws Exception {

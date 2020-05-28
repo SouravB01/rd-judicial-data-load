@@ -22,7 +22,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.juddata.camel.exception.RouteFailedException;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
-import uk.gov.hmcts.reform.juddata.camel.service.AuditProcessingService;
 
 @Component
 public class HeaderValidationProcessor implements Processor {
@@ -32,9 +31,6 @@ public class HeaderValidationProcessor implements Processor {
 
     @Autowired
     CamelContext camelContext;
-
-    @Autowired
-    AuditProcessingService auditProcessingService;
 
     @Override
     public void process(Exchange exchange) throws Exception {

@@ -41,7 +41,7 @@ import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.HeaderValidationProcessor;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
-import uk.gov.hmcts.reform.juddata.camel.service.EmailService;
+
 
 /**
  * This class is Judicial User Profile Router Triggers Orchestrated data loading.
@@ -91,9 +91,6 @@ public class ParentOrchestrationRoute {
     @Autowired
     HeaderValidationProcessor headerValidationProcessor;
 
-    @Autowired
-    EmailService emailService;
-
 
     @SuppressWarnings("unchecked")
     @Transactional("txManager")
@@ -117,7 +114,6 @@ public class ParentOrchestrationRoute {
                             onException(Exception.class)
                                     .handled(true)
                                     .process(exceptionProcessor)
-                                    .process(emailService)
                                     .markRollbackOnly()
                                     .end();
 

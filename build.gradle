@@ -31,6 +31,13 @@ apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
+dependencies {
+    // Your might already have other librarires/dependencies here you should leave them
+    // as they are and just add your on new line
+    compile files('lib/rd-data-load-0.0.1.jar')
+}
+
+
 def versions = [
         lombok             : '1.18.6',
         gradlePitest       : '1.3.0',
@@ -390,6 +397,11 @@ bootJar {
     manifest {
         attributes('Implementation-Version': project.version.toString())
     }
+    enabled = false
+}
+
+jar {
+    enabled = true
 }
 
 // this is required to force Java running on the Azure Windows Server OS into using

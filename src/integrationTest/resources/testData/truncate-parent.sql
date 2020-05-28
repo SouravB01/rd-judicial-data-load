@@ -1,3 +1,0 @@
-truncate judicial_office_appointment cascade;
-truncate judicial_user_profile cascade;
-commit;

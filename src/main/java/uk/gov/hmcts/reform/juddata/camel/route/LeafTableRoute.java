@@ -40,7 +40,7 @@ import uk.gov.hmcts.reform.juddata.camel.processor.ExceptionProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.FileReadProcessor;
 import uk.gov.hmcts.reform.juddata.camel.processor.HeaderValidationProcessor;
 import uk.gov.hmcts.reform.juddata.camel.route.beans.RouteProperties;
-import uk.gov.hmcts.reform.juddata.camel.service.EmailService;
+
 
 @Component
 public class LeafTableRoute {
@@ -89,8 +89,6 @@ public class LeafTableRoute {
     @Value("${scheduler-name}")
     private String schedulerName;
 
-    @Autowired
-    EmailService emailService;
 
     @SuppressWarnings("unchecked")
     @Transactional("txManager")
@@ -113,7 +111,6 @@ public class LeafTableRoute {
                             onException(Exception.class)
                                     .handled(true)
                                     .process(exceptionProcessor)
-                                    .process(emailService)
                                     .markRollbackOnly()
                                     .end();
 

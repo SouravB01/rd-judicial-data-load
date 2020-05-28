@@ -11,17 +11,12 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.gov.hmcts.reform.juddata.camel.service.EmailService;
 
 public class ExceptionProcessorTest extends CamelTestSupport {
-    @Mock
-    EmailService emailService;
 
     @InjectMocks
     ExceptionProcessor exceptionProcessor;
-
 
     @Before
     public void setUp() {

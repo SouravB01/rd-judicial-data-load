@@ -22,7 +22,9 @@ spring:
           lob:
             non_contextual_creation: true
   batch:
-    initialize-schema: always
+    job:
+      enabled: false
+
   jackson.date-format: yyyy-MM-dd
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
